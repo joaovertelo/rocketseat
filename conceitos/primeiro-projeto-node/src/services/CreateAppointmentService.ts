@@ -7,13 +7,13 @@ import AppointmentsRepository from "../repositories/AppointmentsRepository";
 
 
 interface Request {
-    provider: string,
+    providerId: string,
     date: Date
 }
 
 class CreateAppointmentService {
 
-    public async execute({provider, date} : Request): Promise<Appointment> {
+    public async execute({providerId, date} : Request): Promise<Appointment> {
         const appointmentsRepository = getCustomRepository(AppointmentsRepository);
 
 
@@ -25,7 +25,7 @@ class CreateAppointmentService {
             throw Error ('Horário já reservado!!');
         }
 
-        const appointment = appointmentsRepository.create({provider, date: appointmentDate});
+        const appointment = appointmentsRepository.create({provider_id: providerId, date: appointmentDate});
 
         await appointmentsRepository.save(appointment);
 
