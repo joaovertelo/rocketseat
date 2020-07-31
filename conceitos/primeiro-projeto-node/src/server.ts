@@ -10,6 +10,10 @@ import AppError from './errors/AppError';
 
 const app = express();
 
+const cors = require('cors');
+
+app.use(cors());
+
 app.use(express.json());
 
 app.use('/files', express.static(uploadconfig.directory));
