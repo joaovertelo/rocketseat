@@ -11,16 +11,25 @@ import Input from '../../components/input'
 import Button from '../../components/button'
 
 import getValidationErrors from '../../utils/getValidationErrors';
+import { useAuth } from '../../hooks/AuthContext';
 
 import { Container, Content, Background } from './styles';
 
+interface SignInFormData {
+    email: string;
+    password: string;
+}
 const SignIn: React.FC = () => {
 
     const formRef = useRef<FormHandles>(null);
 
-    const handleSubmit = useCallback(async (data: object) => {
+    const { signIn } = useAuth();
+
+    const handleSubmit = useCallback(async (data: SignInFormData) => {
         try {
-            formRef.current?.setErrors({});
+            if (formRef.current) {
+                formRef.current.setErrors({});
+            }
 
             const schema = Yup.object().shape({
                 email: Yup.string().required('E-mail obrigatório').email('Digite um email válido'),
@@ -30,12 +39,13 @@ const SignIn: React.FC = () => {
                 abortEarly: false
             });
 
+            signIn({ email: data.email, password: data.password });
         } catch (err) {
             const errors = getValidationErrors(err);
 
-            formRef.current?.setErrors(errors);
+            if (formRef.current) { formRef.current.setErrors(errors); }
         }
-    }, [])
+    }, [signIn])
 
     return (
         <Container>
