@@ -1,50 +1,42 @@
 import React from 'react'
-import { FiAlertCircle, FiXCircle } from 'react-icons/fi'
+import { FiAlertCircle, FiXCircle, FiInfo, FiCheckCircle } from 'react-icons/fi'
 
 import { Container, Toast } from './styles'
+import { ToastMessage, useToast } from '../../hooks/Toast'
 
-const ToastContainer: React.FC = () => {
+const icons = {
+    info: <FiInfo size={24} />,
+    error: <FiAlertCircle size={24} />,
+    success: <FiCheckCircle size={24} />
+}
+
+
+interface ToastContainerProps {
+    messages: ToastMessage[]
+}
+const ToastContainer: React.FC<ToastContainerProps> = ({ messages }) => {
+    const { removeToast } = useToast();
     return (
         <Container>
-            <Toast hasDescription >
-                <FiAlertCircle size={20} />
+            {messages.map(message => (
+                <Toast key={message.id}
+                    type={message.type}
+                    hasDescription={!!message.description}
+                >
+                    {icons[message.type || 'info']}
 
-                <div>
-                    <strong>Aconteceu um erro</strong>
-                    <p>Não foi possível fazer login</p>
-                </div>
+                    <div>
+                        <strong>{message.title}</strong>
+                        {message.description &&
+                            <p>{message.description}</p>
+                        }
+                    </div>
 
-                <button type="button">
-                    <FiXCircle size={18}/>
-                </button>
-            </Toast>
-
-            <Toast type="success" >
-                <FiAlertCircle size={20} />
-
-                <div>
-                    <strong>Aconteceu um erro</strong>
-                </div>
-
-                <button type="button">
-                    <FiXCircle size={18}/>
-                </button>
-            </Toast>
-
-            <Toast type="error" >
-                <FiAlertCircle size={20} />
-
-                <div>
-                    <strong>Aconteceu um erro</strong>
-                    <p>Não foi possível fazer login</p>
-                </div>
-
-                <button type="button">
-                    <FiXCircle size={18}/>
-                </button>
-            </Toast>
-
-        
+                    <button type="button" onClick={() => removeToast(message.id)}>
+                        <FiXCircle size={18} />
+                    </button>
+                </Toast>
+            ))}
         </Container>
     )
 }

@@ -11,12 +11,23 @@ import logoImg from '../../assets/logo.svg'
 import Input from '../../components/input'
 import Button from '../../components/button'
 
-import { Container, Content, Background } from './styles';
+import { Container, Content, Background, AnimationContainer } from './styles';
+import { Link, useHistory } from 'react-router-dom';
+import api from '../../services/api';
+import { useToast } from '../../hooks/Toast';
+
+interface SignUpFormData {
+    name: string;
+    email: string;
+    password: string;
+}
 
 const SignUp: React.FC = () => {
     const formRef = useRef<FormHandles>(null);
+    const { addToast } = useToast();
+    const history = useHistory();
 
-    const handleSubmit = useCallback(async (data: object) => {
+    const handleSubmit = useCallback(async (data: SignUpFormData) => {
         try {
             formRef.current?.setErrors({});
 
@@ -29,10 +40,25 @@ const SignUp: React.FC = () => {
                 abortEarly: false
             });
 
-        } catch (err) {
-            const errors = getValidationErrors(err);
+            await api.post('/users', data);
 
-            formRef.current?.setErrors(errors);
+            history.push('/')
+
+            addToast({
+                type: "success",
+                title: 'Cadastro realizado',
+                description: 'Agora você já pode fazer logon.'
+            })
+
+        } catch (err) {
+            if (err instanceof Yup.ValidationError) {
+                const errors = getValidationErrors(err);
+
+                if (formRef.current) { formRef.current.setErrors(errors); }
+                return;
+            }
+
+            addToast({ type: 'error', title: 'Erro ao cadastrar', description: "Email já existente!" });
         }
     }, [])
 
@@ -40,24 +66,26 @@ const SignUp: React.FC = () => {
         <Container>
             <Background />
             <Content>
-                <img src={logoImg} alt="GoBarber" />
+                <AnimationContainer>
+                    <img src={logoImg} alt="GoBarber" />
 
-                <Form ref={formRef} onSubmit={handleSubmit} >
-                    <h1>Faça seu cadastro</h1>
-                    <Input name="name" placeholder="Nome" icon={FiUser} />
+                    <Form ref={formRef} onSubmit={handleSubmit} >
+                        <h1>Faça seu cadastro</h1>
+                        <Input name="name" placeholder="Nome" icon={FiUser} />
 
-                    <Input name="email" placeholder="E-mail" icon={FiMail} />
+                        <Input name="email" placeholder="E-mail" icon={FiMail} />
 
-                    <Input name="password" placeholder="Senha" type="password" icon={FiLock} />
+                        <Input name="password" placeholder="Senha" type="password" icon={FiLock} />
 
-                    <Button type="submit"> Cadastrar</Button>
+                        <Button type="submit"> Cadastrar</Button>
 
-                </Form>
+                    </Form>
 
-                <a href="df">
-                    <FiArrowLeft />
-                    Voltar para logon
-            </a>
+                    <Link to="/">
+                        <FiArrowLeft />
+                        Voltar para logon
+                </Link>
+                </AnimationContainer>
             </Content>
         </Container>
     )
