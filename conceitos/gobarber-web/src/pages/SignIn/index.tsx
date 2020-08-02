@@ -12,6 +12,7 @@ import Button from '../../components/button'
 
 import getValidationErrors from '../../utils/getValidationErrors';
 import { useAuth } from '../../hooks/AuthContext';
+import { useToast } from '../../hooks/Toast';
 
 import { Container, Content, Background } from './styles';
 
@@ -24,6 +25,7 @@ const SignIn: React.FC = () => {
     const formRef = useRef<FormHandles>(null);
 
     const { signIn } = useAuth();
+    const { addToast } = useToast();
 
     const handleSubmit = useCallback(async (data: SignInFormData) => {
         try {
@@ -39,13 +41,19 @@ const SignIn: React.FC = () => {
                 abortEarly: false
             });
 
-            signIn({ email: data.email, password: data.password });
+            await signIn({ email: data.email, password: data.password });
         } catch (err) {
-            const errors = getValidationErrors(err);
 
-            if (formRef.current) { formRef.current.setErrors(errors); }
+            if (err instanceof Yup.ValidationError) {
+                const errors = getValidationErrors(err);
+
+                if (formRef.current) { formRef.current.setErrors(errors); }
+            }
+
+            addToast();
+
         }
-    }, [signIn])
+    }, [signIn, addToast])
 
     return (
         <Container>
